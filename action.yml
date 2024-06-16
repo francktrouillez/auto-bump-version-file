@@ -1,0 +1,48 @@
+name: "Auto-Bump Version File"
+author: "Franck Trouillez"
+description: "Automatically bump the version file."
+branding:
+  color: "purple"
+  icon: "file-plus"
+inputs:
+  file:
+    description: "Path to the version file"
+    required: true
+  prefix:
+    description: "Version tag prefix"
+    default: ""
+  suffix:
+    description: "Version tag suffix"
+    default: ""
+  separator:
+    description: "Version tag separator"
+    default: "."
+runs:
+  using: 'composite'
+  steps:
+    - name: Bump Version
+      shell: bash
+      run: |
+        version_file="${{ inputs.file }}"
+        version_prefix="${{ inputs.prefix }}"
+        version_suffix="${{ inputs.suffix }}"
+        version_separator="${{ inputs.separator }}"
+
+        # Read the current version
+        current_version=$(cat $version_file)
+        raw_current_version=${current_version#$version_prefix}
+        raw_current_version=${raw_current_version%$version_suffix}
+
+        # Split the version into parts based on the separator
+        IFS=${version_separator} read -r -a version_parts <<< "$raw_current_version"
+
+        # Increment the last part
+        version_parts[-1]=$((version_parts[-1] + 1))
+
+        # Join the version parts back together
+        new_raw_version=$(IFS=${version_separator} ; echo "${version_parts[*]}")
+        new_version="$version_prefix$new_raw_version$version_suffix"
+
+        # Update the version file
+        echo $new_version > $version_file
+        echo "Bumped to $(cat $version_file)"

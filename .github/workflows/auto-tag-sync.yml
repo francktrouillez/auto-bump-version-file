@@ -1,0 +1,17 @@
+name: Auto Tag sync
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  auto-tag-sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Sync tags
+        uses: francktrouillez/auto-tag-sync@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
